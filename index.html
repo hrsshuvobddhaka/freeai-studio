@@ -18,7 +18,7 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v2.9 Free Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.0 Free Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -165,91 +165,4 @@
 
         function playFallbackBeep() {
             try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
-            } catch (e) {
-                console.log("Audio Context Error:", e);
-            }
-        }
-
-        function playBGM(type) {
-            stopBGM();
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                bgmOscillator = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                bgmOscillator.type = type === 'cinematic' ? 'triangle' : 'sawtooth';
-                bgmOscillator.frequency.setValueAtTime(type === 'cinematic' ? 120 : 80, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                bgmOscillator.connect(gain);
-                gain.connect(audioCtx.destination);
-                bgmOscillator.start();
-            } catch (e) {
-                alert("অডিও প্লে করতে ব্রাউজারে ক্লিক করুন");
-            }
-        }
-
-        function stopBGM() {
-            if (bgmOscillator) {
-                try { bgmOscillator.stop(); } catch(e){}
-                bgmOscillator = null;
-            }
-        }
-
-        function generateScenes() {
-            const script = document.getElementById('scriptInput').value;
-            if(!script) {
-                alert("দয়া করে আগে কিছু গল্প বা স্ক্রিপ্ট লিখুন!");
-                return;
-            }
-            alert("সফলভাবে স্ক্রিপ্টটি দৃশ্য ও শটে ভাগ করা হয়েছে! স্টুডিও টাইমলাইনে যুক্ত হয়েছে।");
-        }
-
-        function enhancePrompt() {
-            const scriptInput = document.getElementById('scriptInput');
-            scriptInput.value = "Cinematic 4K shot, hyper-realistic, dramatic cinematic lighting, smooth drone movement: " + scriptInput.value;
-        }
-
-        function saveProject() {
-            localStorage.setItem('ai_studio_project', document.getElementById('scriptInput').value);
-            alert("প্রজেক্ট সফলভাবে লোকাল স্টোরেজে সংরক্ষিত হয়েছে!");
-        }
-
-        // Real Canvas Video Recording & MP4 Download Function
-        function exportVideo() {
-            alert("ভিডিও রেন্ডারিং শুরু হচ্ছে... দয়া করে ৪ সেকেন্ড অপেক্ষা করুন।");
-            
-            const stream = canvas.captureStream(30); 
-            let recorder;
-            let chunks = [];
-
-            try {
-                recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
-            } catch (e) {
-                try {
-                    recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-                } catch (err) {
-                    recorder = new MediaRecorder(stream);
-                }
-            }
-
-            recorder.ondataavailable = function(e) {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
-
-            recorder.onstop = function() {
-                const blob = new Blob(chunks, { type: 'video/mp4' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'AI_Director_Studio_Project.mp4';
-                document.body.appendChild(a);
-                a.click();
+                if (!audioCtx) audioCtx = new (window.
