@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Director Studio - Video & Movie Generator</title>
+    <title>AI Director Studio - Pro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -18,12 +18,12 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.8 Timeline Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v4.0 Pro Ultimate Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <button onclick="saveProject()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">💾 সেভ</button>
-            <button onclick="showAppInfo()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">📱 অ্যাপ গাইড</button>
+            <button onclick="openProjectModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">📂 প্রজেক্টস</button>
+            <button onclick="saveCurrentProject()" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">💾 সেভ</button>
         </div>
     </header>
 
@@ -57,26 +57,25 @@
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
             <h2 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">১. AI Director & Script-to-Video</h2>
             <div>
-                <label class="block text-xs text-slate-400 mb-1.5">আপনার সিনেমার গল্প বা দৃশ্য বর্ণনা লিখুন (বাক্যগুলো নতুন লাইনে লিখুন):</label>
+                <label class="block text-xs text-slate-400 mb-1.5">আপনার সিনেমার গল্প বা দৃশ্য বর্ণনা লিখুন (প্রতি লাইনে একটি দৃশ্য):</label>
                 <textarea id="scriptInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 transition" placeholder="দৃশ্য ১: ভোরবেলা কুয়াশাচ্ছন্ন গ্রাম।
-দৃশ্য ২: একটি ছেলে সাইকেল চালিয়ে স্কুলের দিকে যাচ্ছে।
-দৃশ্য ৩: স্কুলের মাঠে বন্ধুরা মিলে ফুটবল খেলছে।"></textarea>
+দৃশ্য ২: একটি ছেলে সাইকেল চালিয়ে স্কুলের দিকে যাচ্ছে।"></textarea>
             </div>
             <div class="flex gap-2">
-                <button onclick="generateScenes()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs transition shadow-md shadow-indigo-600/20">✨ দৃশ্য ও শট এআই দিয়ে সাজান</button>
-                <button onclick="enhancePrompt()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold rounded-xl text-xs border border-slate-700 transition">🪄 প্রম্পট উন্নত করুন</button>
+                <button onclick="generateScenes()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs transition shadow-md shadow-indigo-600/20">✨ দৃশ্য ও প্রম্পট জেনারেট করুন</button>
+                <button onclick="enhancePrompt()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold rounded-xl text-xs border border-slate-700 transition">🪄 মাস্টার প্রম্পট</button>
             </div>
         </div>
 
-        <!-- Multi-Shot Timeline Section (New) -->
+        <!-- Multi-Shot Timeline & AI Visual Prompts -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
             <div class="flex items-center justify-between">
-                <h2 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">২. মাল্টি-শট টাইমলাইন ও সিন লিস্ট</h2>
+                <h2 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">২. মাল্টি-শট টাইমলাইন ও এআই প্রম্পট</h2>
                 <span id="sceneCountBadge" class="text-xs bg-slate-800 px-2.5 py-1 rounded-full text-slate-300">০টি দৃশ্য</span>
             </div>
-            <div id="timelineContainer" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+            <div id="timelineContainer" class="space-y-3 max-h-72 overflow-y-auto pr-1">
                 <div class="text-center py-6 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl">
-                    এখনো কোনো দৃশ্য তৈরি করা হয়নি। ওপরে স্ক্রিপ্ট লিখে "দৃশ্য ও শট এআই দিয়ে সাজান" এ ক্লিক করুন।
+                    কোনো দৃশ্য নেই। ওপরে স্ক্রিপ্ট লিখে জেনারেট করুন।
                 </div>
             </div>
         </div>
@@ -88,28 +87,61 @@
                 <label class="block text-xs text-slate-400 mb-1.5">ডায়ালগ বা ভয়েসওভার টেক্সট:</label>
                 <textarea id="voiceText" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 transition">"ভোর হলো, কুয়াশা ভেদ করে নতুন সূর্যের আলো ছড়িয়ে পড়লো গ্রামের চারপাশে।"</textarea>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="playVoiceAudio()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">🗣️ টেস্ট ভয়েস শুনুন</button>
-            </div>
+            <button onclick="playVoiceAudio()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">🗣️ টেস্ট ভয়েস শুনুন</button>
         </div>
 
-        <!-- Music Studio -->
+        <!-- Advanced Music & Audio Mixer -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-            <h2 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">৪. Music & SFX Studio</h2>
-            <div class="grid grid-cols-3 gap-2">
-                <button onclick="playBGM('cinematic')" class="py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition">🎵 সিনেমেটিক বিজিএম</button>
-                <button onclick="playBGM('suspense')" class="py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition">⚡ থ্রিলার/সাসপেন্স</button>
-                <button onclick="stopBGM()" class="py-2 bg-rose-900/40 hover:bg-rose-900/60 border border-rose-800/50 rounded-xl text-xs font-medium text-rose-300 transition">⏹️ বন্ধ করুন</button>
+            <h2 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">৪. Advanced BGM & Audio Mixer</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">মিউজিক মুড সিলেক্ট করুন:</label>
+                    <select id="bgmMood" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <option value="cinematic">🎵 সিনেমেটিক ড্রামা</option>
+                        <option value="suspense">⚡ থ্রিলার ও সাসপেন্স</option>
+                        <option value="action">🔥 অ্যাকশন ও এনার্জেটিক</option>
+                        <option value="emotional">💧 ইমোশনাল ও মেলোডি</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">মিউজিক ভলিউম (<span id="volVal">50</span>%):</label>
+                    <input type="range" id="bgmVolume" min="0" max="100" value="50" oninput="updateVolume(this.value)" class="w-full accent-cyan-500 mt-2">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="playCustomBGM()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition">▶ বিজিএম চালু করুন</button>
+                <button onclick="stopBGM()" class="px-4 py-2 bg-rose-900/40 hover:bg-rose-900/60 border border-rose-800/50 rounded-xl text-xs font-medium text-rose-300 transition">⏹️ বন্ধ</button>
             </div>
         </div>
 
     </main>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-cyan-400">📂 প্রজেক্ট ম্যানেজমেন্ট ড্যাশবোর্ড</h3>
+                <button onclick="closeProjectModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">নতুন প্রজেক্টের নাম:</label>
+                <input type="text" id="projectNameInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500" placeholder="যেমন: আমার প্রথম শর্টফিল্ম">
+            </div>
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-slate-400">সংরক্ষিত প্রজেক্টসমূহ:</span>
+                <div id="savedProjectsList" class="space-y-2 max-h-48 overflow-y-auto">
+                    <p class="text-xs text-slate-500 text-center py-4">কোনো প্রজেক্ট সেভ করা নেই।</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- JavaScript Logic -->
     <script>
         let isPlaying = false;
         let audioCtx = null;
         let bgmOscillator = null;
+        let bgmGainNode = null;
         let scenesList = [];
         let currentSceneIndex = 0;
         let sceneInterval = null;
@@ -129,7 +161,6 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Animated Visualizer Bars
             ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
             for (let i = 0; i < 20; i++) {
                 let h = Math.abs(Math.sin(time + i * 0.4)) * 60;
@@ -139,8 +170,7 @@
             ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
-            let sceneTitle = scenesList.length > 0 ? `দৃশ্য ${currentSceneIndex + 1}: ${scenesList[currentSceneIndex]}` : 'AI Director Studio Live';
-            // Truncate long titles for canvas display
+            let sceneTitle = scenesList.length > 0 ? `দৃশ্য ${currentSceneIndex + 1}: ${scenesList[currentSceneIndex].text}` : 'AI Director Studio Pro';
             if(sceneTitle.length > 40) sceneTitle = sceneTitle.substring(0, 38) + '...';
             ctx.fillText(sceneTitle, canvas.width / 2, 50);
 
@@ -151,7 +181,7 @@
         }
         drawScene();
 
-        // AI Scene Breakdown Generator
+        // 1. AI Scene Breakdown & Visual Prompt Generator
         function generateScenes() {
             const scriptText = document.getElementById('scriptInput').value.trim();
             if(!scriptText) {
@@ -159,18 +189,18 @@
                 return;
             }
 
-            // Split script by newlines or sentences
             let rawLines = scriptText.split('\n').filter(line => line.trim().length > 0);
-            scenesList = rawLines.map(line => line.replace(/^(দৃশ্য|শট)\s*\d*[:|-]?\s*/i, '').trim());
-
-            if(scenesList.length === 0) {
-                scenesList = [scriptText];
-            }
+            scenesList = rawLines.map(line => {
+                let cleanText = line.replace(/^(দৃশ্য|শট)\s*\d*[:|-]?\s*/i, '').trim();
+                return {
+                    text: cleanText,
+                    prompt: `Cinematic 4K shot, hyper-realistic, dramatic lighting, 35mm lens, movie scene: ${cleanText}`
+                };
+            });
 
             renderTimeline();
-            document.getElementById('sceneCountBadgeinnerText', `${scenesList.length}টি দৃশ্য`);
             document.getElementById('sceneCountBadge').innerText = `${scenesList.length}টি দৃশ্য`;
-            alert(`সফলভাবে ${scenesList.length}টি দৃশ্যে শট ভাগ করা হয়েছে! নিচে টাইমলাইনে দেখতে পাবেন।`);
+            alert(`সফলভাবে ${scenesList.length}টি দৃশ্যে শট ও এআই প্রম্পট জেনারেট করা হয়েছে!`);
         }
 
         function renderTimeline() {
@@ -179,13 +209,18 @@
 
             scenesList.forEach((scene, index) => {
                 const item = document.createElement('div');
-                item.className = `p-3 rounded-xl border flex items-center justify-between transition ${index === currentSceneIndex ? 'bg-cyan-950/40 border-cyan-500/50' : 'bg-slate-950 border-slate-800'}`;
+                item.className = `p-3 rounded-xl border space-y-2 transition ${index === currentSceneIndex ? 'bg-cyan-950/40 border-cyan-500/50' : 'bg-slate-950 border-slate-800'}`;
                 item.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">${index + 1}</div>
-                        <p class="text-xs text-slate-300 font-medium">${scene}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">${index + 1}</span>
+                            <p class="text-xs text-slate-200 font-semibold">${scene.text}</p>
+                        </div>
+                        <button onclick="jumpToScene(${index})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs rounded-lg transition">▶ প্রিভিউ</button>
                     </div>
-                    <button onclick="jumpToScene(${index})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs rounded-lg transition">▶ প্রিভিউ</button>
+                    <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-800 text-[11px] text-cyan-400 font-mono">
+                        🎨 AI Prompt: ${scene.prompt}
+                    </div>
                 `;
                 container.appendChild(item);
             });
@@ -193,8 +228,8 @@
 
         function jumpToScene(index) {
             currentSceneIndex = index;
-            document.getElementById('subtitleOverlay').innerText = `"${scenesList[index]}"`;
-            document.getElementById('voiceText').value = scenesList[index];
+            document.getElementById('subtitleOverlay').innerText = `"${scenesList[index].text}"`;
+            document.getElementById('voiceText').value = scenesList[index].text;
             renderTimeline();
         }
 
@@ -208,16 +243,12 @@
                 btn.className = 'px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
                 statusLabel.innerText = 'লাইভ টাইমলাইন প্লে হচ্ছে...';
                 
-                if(scenesList.length === 0) {
-                    generateScenes();
-                }
-
+                if(scenesList.length === 0) generateScenes();
                 currentSceneIndex = 0;
                 drawScene();
-                playBGM('cinematic');
+                playCustomBGM();
                 playVoiceAudio();
 
-                // Auto rotate scenes every 4 seconds
                 if(scenesList.length > 1) {
                     sceneInterval = setInterval(() => {
                         currentSceneIndex = (currentSceneIndex + 1) % scenesList.length;
@@ -225,7 +256,6 @@
                         playVoiceAudio();
                     }, 4000);
                 }
-
             } else {
                 btn.innerHTML = '▶ লাইভ ডিরেক্টর প্লে করুন';
                 btn.className = 'px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
@@ -237,8 +267,8 @@
 
         function playVoiceAudio() {
             if(scenesList.length > 0) {
-                document.getElementById('voiceText').value = scenesList[currentSceneIndex];
-                document.getElementById('subtitleOverlay').innerText = `"${scenesList[currentSceneIndex]}"`;
+                document.getElementById('voiceText').value = scenesList[currentSceneIndex].text;
+                document.getElementById('subtitleOverlay').innerText = `"${scenesList[currentSceneIndex].text}"`;
             }
             const text = document.getElementById('voiceText').value;
             if(!text) return;
@@ -246,9 +276,7 @@
             try {
                 const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=bn&client=tw-ob`;
                 const audio = new Audio(ttsUrl);
-                audio.play().catch(err => {
-                    speakFallback(text);
-                });
+                audio.play().catch(err => speakFallback(text));
             } catch (e) {
                 speakFallback(text);
             }
@@ -263,20 +291,38 @@
             }
         }
 
-        function playBGM(type) {
+        // 2. Advanced BGM & Audio Mixer
+        function playCustomBGM() {
             stopBGM();
+            const mood = document.getElementById('bgmMood').value;
+            const vol = document.getElementById('bgmVolume').value / 100;
+
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 bgmOscillator = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                bgmOscillator.type = type === 'cinematic' ? 'triangle' : 'sawtooth';
-                bgmOscillator.frequency.setValueAtTime(type === 'cinematic' ? 120 : 80, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-                bgmOscillator.connect(gain);
-                gain.connect(audioCtx.destination);
+                bgmGainNode = audioCtx.createGain();
+
+                let freq = 120;
+                if(mood === 'suspense') { freq = 80; bgmOscillator.type = 'sawtooth'; }
+                else if(mood === 'action') { freq = 150; bgmOscillator.type = 'square'; }
+                else if(mood === 'emotional') { freq = 220; bgmOscillator.type = 'sine'; }
+                else { freq = 110; bgmOscillator.type = 'triangle'; }
+
+                bgmOscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                bgmGainNode.gain.setValueAtTime(vol * 0.1, audioCtx.currentTime);
+
+                bgmOscillator.connect(bgmGainNode);
+                bgmGainNode.connect(audioCtx.destination);
                 bgmOscillator.start();
             } catch (e) {
-                console.log("Audio Context info:", e);
+                console.log("Audio mixer error:", e);
+            }
+        }
+
+        function updateVolume(val) {
+            document.getElementById('volVal').innerText = val;
+            if(bgmGainNode && audioCtx) {
+                bgmGainNode.gain.setValueAtTime((val / 100) * 0.1, audioCtx.currentTime);
             }
         }
 
@@ -288,18 +334,76 @@
             if(sceneInterval) clearInterval(sceneInterval);
         }
 
+        // 3. Project Management & LocalStorage Sync
+        function openProjectModal() {
+            document.getElementById('projectModal').classList.remove('hidden');
+            loadSavedProjectsList();
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.add('hidden');
+        }
+
+        function saveCurrentProject() {
+            const name = document.getElementById('projectNameInput').value.trim() || `প্রজেক্ট_${Date.now().toString().slice(-4)}`;
+            const script = document.getElementById('scriptInput').value;
+            
+            let projects = JSON.parse(localStorage.getItem('ai_director_projects') || '{}');
+            projects[name] = { script, timestamp: new Date().toLocaleDateString() };
+            
+            localStorage.setItem('ai_director_projects', JSON.stringify(projects));
+            alert(`"${name}" প্রজেক্ট সফলভাবে সেভ হয়েছে!`);
+            closeProjectModal();
+        }
+
+        function loadSavedProjectsList() {
+            const listContainer = document.getElementById('savedProjectsList');
+            let projects = JSON.parse(localStorage.getItem('ai_director_projects') || '{}');
+            let keys = Object.keys(projects);
+
+            if(keys.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">কোনো প্রজেক্ট সেভ করা নেই।</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            keys.forEach(key => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800';
+                div.innerHTML = `
+                    <div>
+                        <p class="text-xs font-semibold text-slate-200">${key}</p>
+                        <span class="text-[10px] text-slate-500">${projects[key].timestamp}</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="loadProjectData('${key}')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] rounded-lg">লোড</button>
+                        <button onclick="deleteProject('${key}')" class="px-2 py-1 bg-rose-900/40 hover:bg-rose-900/60 text-rose-300 text-[11px] rounded-lg">মুছুন</button>
+                    </div>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        function loadProjectData(name) {
+            let projects = JSON.parse(localStorage.getItem('ai_director_projects') || '{}');
+            if(projects[name]) {
+                document.getElementById('scriptInput').value = projects[name].script;
+                generateScenes();
+                closeProjectModal();
+                alert(`"${name}" প্রজেক্ট লোড করা হয়েছে!`);
+            }
+        }
+
+        function deleteProject(name) {
+            let projects = JSON.parse(localStorage.getItem('ai_director_projects') || '{}');
+            delete projects[name];
+            localStorage.setItem('ai_director_projects', JSON.stringify(projects));
+            loadSavedProjectsList();
+        }
+
         function enhancePrompt() {
             const scriptInput = document.getElementById('scriptInput');
-            scriptInput.value = "Cinematic 4K shot, hyper-realistic, dramatic lighting:\n" + scriptInput.value;
-        }
-
-        function saveProject() {
-            localStorage.setItem('ai_studio_project', document.getElementById('scriptInput').value);
-            alert("প্রজেক্ট সফলভাবে লোকাল স্টোরেজে সেভ হয়েছে!");
-        }
-
-        function showAppInfo() {
-            alert("💡 AI Director Studio v3.8\n\nস্মার্ট সিন জেনারেটর ও মাল্টি-শট টাইমলাইন সক্রিয় রয়েছে। স্ক্রিপ্ট লিখে দৃশ্য সাজিয়ে প্রিভিউ প্লে করে দেখতে পারেন।");
+            scriptInput.value = "Master Cinematic 8K, highly detailed, dramatic studio lighting:\n" + scriptInput.value;
         }
     </script>
 </body>
