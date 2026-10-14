@@ -10,6 +10,18 @@
         body { font-family: 'Hind Siliguri', sans-serif; }
     </style>
 </head>
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Director Studio - Video & Movie Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; }
+    </style>
+</head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
     <!-- Top Navigation -->
@@ -18,12 +30,12 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.6 Live Studio Engine</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.7 App Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
             <button onclick="saveProject()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">💾 সেভ</button>
-            <button onclick="exportProjectFile()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">📦 প্রজেক্ট ফাইল</button>
+            <button onclick="showAppInfo()" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">📱 অ্যাপ গাইড</button>
         </div>
     </header>
 
@@ -151,7 +163,6 @@
             }
         }
 
-        // Bangla Voice Audio with Google TTS & Fallback
         function playVoiceAudio() {
             const text = document.getElementById('voiceText').value;
             if(!text) return;
@@ -217,20 +228,11 @@
 
         function saveProject() {
             localStorage.setItem('ai_studio_project', document.getElementById('scriptInput').value);
-            alert("প্রজেক্ট সফলভাবে সেভ হয়েছে!");
+            alert("প্রজেক্ট সফলভাবে লোকাল স্টোরেজে সেভ হয়েছে!");
         }
 
-        function exportProjectFile() {
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `AI_Director_Studio_${Date.now()}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            alert("প্রজেক্ট ফাইল সফলভাবে ডাউনলোড হয়েছে!");
+        function showAppInfo() {
+            alert("💡 AI Director Studio v3.7\n\nএটি একটি ব্রাউজার-বেসড এআই ভিডিও স্টুডিও। আপনি এখানে স্ক্রিপ্ট লিখতে, ভয়েস টেস্ট করতে এবং ভিজ্যুয়াল অ্যানিমেশন চালাতে পারছেন।\n\nপরবর্তীতে এটিকে মোবাইল অ্যাপ (APK) হিসেবে তৈরি করলে সরাসরি গ্যালারিতে ভিডিও এক্সপোর্ট করা সম্ভব হবে।");
         }
     </script>
 </body>
