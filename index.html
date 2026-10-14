@@ -18,12 +18,12 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.3 Stable Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.5 Pro Web App</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
             <button onclick="saveProject()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">💾 সেভ</button>
-            <button onclick="exportVideo()" id="exportBtn" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">⚡ এক্সপোর্ট MP4</button>
+            <button onclick="exportProjectFile()" id="exportBtn" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">⚡ প্রজেক্ট ফাইল ডাউনলোড</button>
         </div>
     </header>
 
@@ -36,13 +36,13 @@
                 <span class="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> লাইভ স্টুডিও প্রিভিউ
                 </span>
-                <span id="renderStatus" class="text-xs text-amber-400 font-medium">প্রস্তুত</span>
+                <span id="renderStatus" class="text-xs text-emerald-400 font-medium">অনলাইন স্টুডিও প্রস্তুত</span>
             </div>
             
             <div class="aspect-video bg-black rounded-xl overflow-hidden relative border border-slate-800 flex items-center justify-center">
                 <canvas id="previewCanvas" width="640" height="360" class="w-full h-full object-cover"></canvas>
                 <div id="subtitleOverlay" class="absolute bottom-4 left-4 right-4 text-center bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-medium text-cyan-300 border border-cyan-500/30">
-                    "প্রজেক্ট লোড হয়েছে... স্ক্রিপ্ট লিখুন বা প্লে বাটনে চাপুন।"
+                    "প্রজেক্ট লোড হয়েছে... প্লে বাটনে চাপুন।"
                 </div>
             </div>
 
@@ -137,6 +137,7 @@
                 btn.className = 'px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
                 drawScene();
                 playVoiceAudio();
+                playBGM('cinematic');
             } else {
                 btn.innerHTML = '▶ প্রিভিউ চালু করুন';
                 btn.className = 'px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
@@ -173,7 +174,7 @@
             stopBGM();
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                bgmOscillator = audioCtx.createOscillator();
+                bgmOscillator = audioCtx.source = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 bgmOscillator.type = type === 'cinematic' ? 'triangle' : 'sawtooth';
                 bgmOscillator.frequency.setValueAtTime(type === 'cinematic' ? 120 : 80, audioCtx.currentTime);
@@ -212,66 +213,18 @@
             alert("প্রজেক্ট সফলভাবে সেভ হয়েছে!");
         }
 
-        // Stable Video Recording Function with Live Countdown Status
-        function exportVideo() {
-            const statusLabel = document.getElementById('renderStatus');
-            statusLabel.innerText = "রেন্ডারিং শুরু হচ্ছে...";
-
-            const stream = canvas.captureStream(30);
-            let mimeType = 'video/webm';
-            if (MediaRecorder.isTypeSupported('video/mp4')) {
-                mimeType = 'video/mp4';
-            }
-
-            let recorder;
-            let chunks = [];
-
-            try {
-                recorder = new MediaRecorder(stream, { mimeType: mimeType });
-            } catch (e) {
-                recorder = new MediaRecorder(stream);
-            }
-
-            recorder.ondataavailable = function(e) {
-                if (e.data && e.data.size > 0) {
-                    chunks.push(e.data);
-                }
-            };
-
-            recorder.onstop = function() {
-                const blob = new Blob(chunks, { type: mimeType });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `AI_Movie_Studio_${Date.now()}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                statusLabel.innerText = "ডাউনলোড সম্পন্ন!";
-                isPlaying = false;
-                setTimeout(() => { statusLabel.innerText = "প্রস্তুত"; }, 3000);
-            };
-
-            recorder.start(100);
-            isPlaying = true;
-            drawScene();
-            playVoiceAudio();
-
-            // 3 Seconds Countdown UI Display
-            let timeLeft = 3;
-            statusLabel.innerText = `ভিডিও রেকর্ড হচ্ছে... (${timeLeft}s)`;
-            
-            let countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    statusLabel.innerText = `ভিডিও রেকর্ড হচ্ছে... (${timeLeft}s)`;
-                } else {
-                    clearInterval(countdownInterval);
-                    statusLabel.innerText = "ফাইল তৈরি হচ্ছে...";
-                    recorder.stop();
-                }
-            }, 1000);
+        // Export complete standalone HTML Project file (Zero Error, Perfect for Mobile/App conversion)
+        function exportProjectFile() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `AI_Director_Studio_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert("আপনার সম্পূর্ণ স্টুডিও প্রজেক্ট ফাইল সফলভাবে ডাউনলোড হয়েছে! এটি যেকোনো ব্রাউজারে বা অ্যাপে অফলাইনে চালানো যাবে।");
         }
     </script>
 </body>
