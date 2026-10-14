@@ -18,12 +18,12 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.2 Audio-Video Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.3 Stable Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
             <button onclick="saveProject()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">💾 সেভ</button>
-            <button onclick="exportVideo()" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">⚡ এক্সপোর্ট MP4</button>
+            <button onclick="exportVideo()" id="exportBtn" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">⚡ এক্সপোর্ট MP4</button>
         </div>
     </header>
 
@@ -36,7 +36,7 @@
                 <span class="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> লাইভ স্টুডিও প্রিভিউ
                 </span>
-                <span id="currentTimeDisplay" class="text-xs text-slate-400">00:00 / 00:30</span>
+                <span id="renderStatus" class="text-xs text-amber-400 font-medium">প্রস্তুত</span>
             </div>
             
             <div class="aspect-video bg-black rounded-xl overflow-hidden relative border border-slate-800 flex items-center justify-center">
@@ -147,7 +147,6 @@
         function playVoiceAudio() {
             const text = document.getElementById('voiceText').value;
             if(!text) return;
-            
             document.getElementById('subtitleOverlay').innerText = `"${text}"`;
 
             try {
@@ -183,7 +182,7 @@
                 gain.connect(audioCtx.destination);
                 bgmOscillator.start();
             } catch (e) {
-                alert("ব্রাউজারে সাউন্ড প্লে করার জন্য স্ক্রিনে টাচ করুন।");
+                console.log("Audio Context info:", e);
             }
         }
 
@@ -213,73 +212,66 @@
             alert("প্রজেক্ট সফলভাবে সেভ হয়েছে!");
         }
 
-        // Advanced Video Recording with Web Audio & Canvas Stream Integration
-        async function exportVideo() {
-            alert("ভিডিও ও সাউন্ড রেন্ডারিং শুরু হচ্ছে... দয়া করে ৪ সেকেন্ড অপেক্ষা করুন।");
+        // Stable Video Recording Function with Live Countdown Status
+        function exportVideo() {
+            const statusLabel = document.getElementById('renderStatus');
+            statusLabel.innerText = "রেন্ডারিং শুরু হচ্ছে...";
 
-            const canvasStream = canvas.captureStream(30);
-            
-            // Web Audio Destination থেকে অডিও স্ট্রিম নেওয়ার ব্যবস্থা
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const dest = audioCtx.createMediaStreamDestination();
-                
-                // ব্যাকগ্রাউন্ড মিউজিক অডিও সোর্স তৈরি ও কানেক্ট করা
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(dest);
-                gain.connect(audioCtx.destination);
-                osc.start();
-
-                // ক্যানভাস স্ট্রিম এবং অডিও স্ট্রিম একত্রে যুক্ত করা
-                const combinedStream = new MediaStream([
-                    ...canvasStream.getVideoTracks(),
-                    ...dest.stream.getAudioTracks()
-                ]);
-
-                let mimeType = 'video/webm';
-                if (MediaRecorder.isTypeSupported('video/mp4')) {
-                    mimeType = 'video/mp4';
-                }
-
-                let recorder = new MediaRecorder(combinedStream, { mimeType: mimeType });
-                let chunks = [];
-
-                recorder.ondataavailable = e => {
-                    if (e.data && e.data.size > 0) chunks.push(e.data);
-                };
-
-                recorder.onstop = () => {
-                    try { osc.stop(); } catch(err){}
-                    const blob = new Blob(chunks, { type: mimeType });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `AI_Movie_Audio_${Date.now()}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    alert("ভিডিও ও সাউন্ডসহ সফলভাবে ডাউনলোড সম্পন্ন হয়েছে!");
-                };
-
-                recorder.start(100);
-                isPlaying = true;
-                drawScene();
-                playVoiceAudio();
-
-                setTimeout(() => {
-                    recorder.stop();
-                    isPlaying = false;
-                }, 4000);
-
-            } catch (err) {
-                console.error("Audio recording error:", err);
-                alert("অডিও রেকর্ড করতে ব্রাউজারে অনুমতি বা সমস্যা হয়েছে। সাধারণ ভিডিও ডাউনলোড করা হচ্ছে।");
+            const stream = canvas.captureStream(30);
+            let mimeType = 'video/webm';
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+                mimeType = 'video/mp4';
             }
+
+            let recorder;
+            let chunks = [];
+
+            try {
+                recorder = new MediaRecorder(stream, { mimeType: mimeType });
+            } catch (e) {
+                recorder = new MediaRecorder(stream);
+            }
+
+            recorder.ondataavailable = function(e) {
+                if (e.data && e.data.size > 0) {
+                    chunks.push(e.data);
+                }
+            };
+
+            recorder.onstop = function() {
+                const blob = new Blob(chunks, { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `AI_Movie_Studio_${Date.now()}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                statusLabel.innerText = "ডাউনলোড সম্পন্ন!";
+                isPlaying = false;
+                setTimeout(() => { statusLabel.innerText = "প্রস্তুত"; }, 3000);
+            };
+
+            recorder.start(100);
+            isPlaying = true;
+            drawScene();
+            playVoiceAudio();
+
+            // 3 Seconds Countdown UI Display
+            let timeLeft = 3;
+            statusLabel.innerText = `ভিডিও রেকর্ড হচ্ছে... (${timeLeft}s)`;
+            
+            let countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    statusLabel.innerText = `ভিডিও রেকর্ড হচ্ছে... (${timeLeft}s)`;
+                } else {
+                    clearInterval(countdownInterval);
+                    statusLabel.innerText = "ফাইল তৈরি হচ্ছে...";
+                    recorder.stop();
+                }
+            }, 1000);
         }
     </script>
 </body>
