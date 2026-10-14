@@ -18,12 +18,12 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.5 Pro Web App</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.6 Live Studio Engine</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
             <button onclick="saveProject()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">💾 সেভ</button>
-            <button onclick="exportProjectFile()" id="exportBtn" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-xs font-bold rounded-lg shadow-md shadow-cyan-500/20 transition">⚡ প্রজেক্ট ফাইল ডাউনলোড</button>
+            <button onclick="exportProjectFile()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition">📦 প্রজেক্ট ফাইল</button>
         </div>
     </header>
 
@@ -34,21 +34,21 @@
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> লাইভ স্টুডিও প্রিভিউ
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> লাইভ ডিরেক্টর স্টুডিও
                 </span>
-                <span id="renderStatus" class="text-xs text-emerald-400 font-medium">অনলাইন স্টুডিও প্রস্তুত</span>
+                <span id="renderStatus" class="text-xs text-emerald-400 font-medium">স্টুডিও প্রস্তুত</span>
             </div>
             
             <div class="aspect-video bg-black rounded-xl overflow-hidden relative border border-slate-800 flex items-center justify-center">
                 <canvas id="previewCanvas" width="640" height="360" class="w-full h-full object-cover"></canvas>
-                <div id="subtitleOverlay" class="absolute bottom-4 left-4 right-4 text-center bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-medium text-cyan-300 border border-cyan-500/30">
-                    "প্রজেক্ট লোড হয়েছে... প্লে বাটনে চাপুন।"
+                <div id="subtitleOverlay" class="absolute bottom-4 left-4 right-4 text-center bg-black/75 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-medium text-cyan-300 border border-cyan-500/30">
+                    "স্ক্রিপ্ট লিখে প্লে বাটনে চাপুন, ভয়েস ও ভিডিও একসাথে চলবে।"
                 </div>
             </div>
 
-            <div class="mt-4 flex items-center justify-center gap-4">
-                <button onclick="togglePlayPreview()" id="playPauseBtn" class="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg shadow-cyan-500/30 transition flex items-center gap-2">
-                    ▶ প্রিভিউ চালু করুন
+            <div class="mt-4 flex items-center justify-center gap-3">
+                <button onclick="togglePlayPreview()" id="playPauseBtn" class="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg shadow-cyan-500/30 transition flex items-center gap-2">
+                    ▶ লাইভ ডিরেক্টর প্লে করুন
                 </button>
             </div>
         </div>
@@ -111,16 +111,17 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+            // Animated Visualizer Bars
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
             for (let i = 0; i < 20; i++) {
-                let h = Math.abs(Math.sin(time + i * 0.5)) * 50;
+                let h = Math.abs(Math.sin(time + i * 0.4)) * 60;
                 ctx.fillRect(i * 33 + 10, canvas.height - h - 20, 20, h);
             }
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.font = 'bold 20px sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.font = 'bold 22px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('AI Director Studio Preview', canvas.width / 2, 50);
+            ctx.fillText('AI Director Studio Live', canvas.width / 2, 50);
 
             if (isPlaying) {
                 frameCount++;
@@ -132,19 +133,25 @@
         function togglePlayPreview() {
             isPlaying = !isPlaying;
             const btn = document.getElementById('playPauseBtn');
+            const statusLabel = document.getElementById('renderStatus');
+
             if (isPlaying) {
-                btn.innerHTML = '⏸ প্রিভিউ থামান';
-                btn.className = 'px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
+                btn.innerHTML = '⏸ প্লে থামান';
+                btn.className = 'px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
+                statusLabel.innerText = 'লাইভ প্লে হচ্ছে...';
+                
                 drawScene();
-                playVoiceAudio();
                 playBGM('cinematic');
+                playVoiceAudio();
             } else {
-                btn.innerHTML = '▶ প্রিভিউ চালু করুন';
-                btn.className = 'px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
+                btn.innerHTML = '▶ লাইভ ডিরেক্টর প্লে করুন';
+                btn.className = 'px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
+                statusLabel.innerText = 'স্টুডিও প্রস্তুত';
                 stopBGM();
             }
         }
 
+        // Bangla Voice Audio with Google TTS & Fallback
         function playVoiceAudio() {
             const text = document.getElementById('voiceText').value;
             if(!text) return;
@@ -174,11 +181,11 @@
             stopBGM();
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                bgmOscillator = audioCtx.source = audioCtx.createOscillator();
+                bgmOscillator = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 bgmOscillator.type = type === 'cinematic' ? 'triangle' : 'sawtooth';
                 bgmOscillator.frequency.setValueAtTime(type === 'cinematic' ? 120 : 80, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
                 bgmOscillator.connect(gain);
                 gain.connect(audioCtx.destination);
                 bgmOscillator.start();
@@ -213,7 +220,6 @@
             alert("প্রজেক্ট সফলভাবে সেভ হয়েছে!");
         }
 
-        // Export complete standalone HTML Project file (Zero Error, Perfect for Mobile/App conversion)
         function exportProjectFile() {
             const htmlContent = document.documentElement.outerHTML;
             const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -224,7 +230,7 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            alert("আপনার সম্পূর্ণ স্টুডিও প্রজেক্ট ফাইল সফলভাবে ডাউনলোড হয়েছে! এটি যেকোনো ব্রাউজারে বা অ্যাপে অফলাইনে চালানো যাবে।");
+            alert("প্রজেক্ট ফাইল সফলভাবে ডাউনলোড হয়েছে!");
         }
     </script>
 </body>
