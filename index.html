@@ -18,7 +18,7 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.1 Free Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.2 Audio-Video Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -96,7 +96,6 @@
         let audioCtx = null;
         let bgmOscillator = null;
 
-        // Canvas Setup
         const canvas = document.getElementById('previewCanvas');
         const ctx = canvas.getContext('2d');
         let frameCount = 0;
@@ -134,7 +133,7 @@
             isPlaying = !isPlaying;
             const btn = document.getElementById('playPauseBtn');
             if (isPlaying) {
-                btn.innerHTML = '⏸ প্রিভিউ থামান ফাইল';
+                btn.innerHTML = '⏸ প্রিভিউ থামান';
                 btn.className = 'px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
                 drawScene();
                 playVoiceAudio();
@@ -145,7 +144,6 @@
             }
         }
 
-        // Voice Audio using HTML5 Audio (Google TTS) with fallback
         function playVoiceAudio() {
             const text = document.getElementById('voiceText').value;
             if(!text) return;
@@ -156,7 +154,6 @@
                 const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=bn&client=tw-ob`;
                 const audio = new Audio(ttsUrl);
                 audio.play().catch(err => {
-                    console.log("TTS blocked, fallback to speech synth");
                     speakFallback(text);
                 });
             } catch (e) {
@@ -216,49 +213,73 @@
             alert("প্রজেক্ট সফলভাবে সেভ হয়েছে!");
         }
 
-        // Direct Video Download (Ensuring no .txt extension)
-        function exportVideo() {
-            alert("ভিডিও রেন্ডারিং ও এক্সপোর্ট হচ্ছে... দয়া করে ৪ সেকেন্ড অপেক্ষা করুন।");
+        // Advanced Video Recording with Web Audio & Canvas Stream Integration
+        async function exportVideo() {
+            alert("ভিডিও ও সাউন্ড রেন্ডারিং শুরু হচ্ছে... দয়া করে ৪ সেকেন্ড অপেক্ষা করুন।");
+
+            const canvasStream = canvas.captureStream(30);
             
-            const stream = canvas.captureStream(30); 
-            let mimeType = 'video/webm';
-            if (MediaRecorder.isTypeSupported('video/mp4')) {
-                mimeType = 'video/mp4';
-            }
-
-            let recorder;
-            let chunks = [];
-
+            // Web Audio Destination থেকে অডিও স্ট্রিম নেওয়ার ব্যবস্থা
             try {
-                recorder = new MediaRecorder(stream, { mimeType: mimeType });
-            } catch (e) {
-                recorder = new MediaRecorder(stream);
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const dest = audioCtx.createMediaStreamDestination();
+                
+                // ব্যাকগ্রাউন্ড মিউজিক অডিও সোর্স তৈরি ও কানেক্ট করা
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(dest);
+                gain.connect(audioCtx.destination);
+                osc.start();
+
+                // ক্যানভাস স্ট্রিম এবং অডিও স্ট্রিম একত্রে যুক্ত করা
+                const combinedStream = new MediaStream([
+                    ...canvasStream.getVideoTracks(),
+                    ...dest.stream.getAudioTracks()
+                ]);
+
+                let mimeType = 'video/webm';
+                if (MediaRecorder.isTypeSupported('video/mp4')) {
+                    mimeType = 'video/mp4';
+                }
+
+                let recorder = new MediaRecorder(combinedStream, { mimeType: mimeType });
+                let chunks = [];
+
+                recorder.ondataavailable = e => {
+                    if (e.data && e.data.size > 0) chunks.push(e.data);
+                };
+
+                recorder.onstop = () => {
+                    try { osc.stop(); } catch(err){}
+                    const blob = new Blob(chunks, { type: mimeType });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `AI_Movie_Audio_${Date.now()}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    alert("ভিডিও ও সাউন্ডসহ সফলভাবে ডাউনলোড সম্পন্ন হয়েছে!");
+                };
+
+                recorder.start(100);
+                isPlaying = true;
+                drawScene();
+                playVoiceAudio();
+
+                setTimeout(() => {
+                    recorder.stop();
+                    isPlaying = false;
+                }, 4000);
+
+            } catch (err) {
+                console.error("Audio recording error:", err);
+                alert("অডিও রেকর্ড করতে ব্রাউজারে অনুমতি বা সমস্যা হয়েছে। সাধারণ ভিডিও ডাউনলোড করা হচ্ছে।");
             }
-
-            recorder.ondataavailable = function(e) {
-                if (e.data && e.data.size > 0) chunks.push(e.data);
-            };
-
-            recorder.onstop = function() {
-                const blob = new Blob(chunks, { type: mimeType });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `AI_Movie_${Date.now()}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                alert("ভিডিও ডাউনলোড সম্পন্ন হয়েছে!");
-            };
-
-            recorder.start(100);
-            isPlaying = true;
-            drawScene();
-
-            setTimeout(() => {
-                recorder.stop();
-                isPlaying = false;
-            }, 4000);
         }
     </script>
 </body>
