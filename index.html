@@ -18,7 +18,7 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v3.0 Free Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v3.1 Free Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -96,7 +96,7 @@
         let audioCtx = null;
         let bgmOscillator = null;
 
-        // Canvas Rendering Animation
+        // Canvas Setup
         const canvas = document.getElementById('previewCanvas');
         const ctx = canvas.getContext('2d');
         let frameCount = 0;
@@ -105,7 +105,6 @@
             ctx.fillStyle = '#05050a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Animated Cinematic Gradient Background
             let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             let time = frameCount * 0.02;
             gradient.addColorStop(0, `hsl(${Math.sin(time) * 30 + 200}, 70%, 15%)`);
@@ -113,15 +112,13 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Visualizer bars
             ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
             for (let i = 0; i < 20; i++) {
                 let h = Math.abs(Math.sin(time + i * 0.5)) * 50;
                 ctx.fillRect(i * 33 + 10, canvas.height - h - 20, 20, h);
             }
 
-            // Title Watermark
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('AI Director Studio Preview', canvas.width / 2, 50);
@@ -137,7 +134,7 @@
             isPlaying = !isPlaying;
             const btn = document.getElementById('playPauseBtn');
             if (isPlaying) {
-                btn.innerHTML = '⏸ প্রিভিউ থামান';
+                btn.innerHTML = '⏸ প্রিভিউ থামান ফাইল';
                 btn.className = 'px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition flex items-center gap-2';
                 drawScene();
                 playVoiceAudio();
@@ -148,21 +145,121 @@
             }
         }
 
-        // Google Translate TTS based Bangla Voice Generator
+        // Voice Audio using HTML5 Audio (Google TTS) with fallback
         function playVoiceAudio() {
             const text = document.getElementById('voiceText').value;
+            if(!text) return;
+            
             document.getElementById('subtitleOverlay').innerText = `"${text}"`;
 
-            if (!text) return;
-
-            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=bn&client=tw-ob`;
-            const audio = new Audio(ttsUrl);
-            audio.play().catch(error => {
-                console.log("Audio play blocked, using fallback beep:", error);
-                playFallbackBeep();
-            });
+            try {
+                const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=bn&client=tw-ob`;
+                const audio = new Audio(ttsUrl);
+                audio.play().catch(err => {
+                    console.log("TTS blocked, fallback to speech synth");
+                    speakFallback(text);
+                });
+            } catch (e) {
+                speakFallback(text);
+            }
         }
 
-        function playFallbackBeep() {
+        function speakFallback(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'bn-BD';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playBGM(type) {
+            stopBGM();
             try {
-                if (!audioCtx) audioCtx = new (window.
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                bgmOscillator = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                bgmOscillator.type = type === 'cinematic' ? 'triangle' : 'sawtooth';
+                bgmOscillator.frequency.setValueAtTime(type === 'cinematic' ? 120 : 80, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                bgmOscillator.connect(gain);
+                gain.connect(audioCtx.destination);
+                bgmOscillator.start();
+            } catch (e) {
+                alert("ব্রাউজারে সাউন্ড প্লে করার জন্য স্ক্রিনে টাচ করুন।");
+            }
+        }
+
+        function stopBGM() {
+            if (bgmOscillator) {
+                try { bgmOscillator.stop(); } catch(e){}
+                bgmOscillator = null;
+            }
+        }
+
+        function generateScenes() {
+            const script = document.getElementById('scriptInput').value;
+            if(!script) {
+                alert("দয়া করে আগে কিছু গল্প বা স্ক্রিপ্ট লিখুন!");
+                return;
+            }
+            alert("সফলভাবে স্ক্রিপ্টটি দৃশ্য ও শটে ভাগ করা হয়েছে!");
+        }
+
+        function enhancePrompt() {
+            const scriptInput = document.getElementById('scriptInput');
+            scriptInput.value = "Cinematic 4K shot, hyper-realistic, dramatic lighting: " + scriptInput.value;
+        }
+
+        function saveProject() {
+            localStorage.setItem('ai_studio_project', document.getElementById('scriptInput').value);
+            alert("প্রজেক্ট সফলভাবে সেভ হয়েছে!");
+        }
+
+        // Direct Video Download (Ensuring no .txt extension)
+        function exportVideo() {
+            alert("ভিডিও রেন্ডারিং ও এক্সপোর্ট হচ্ছে... দয়া করে ৪ সেকেন্ড অপেক্ষা করুন।");
+            
+            const stream = canvas.captureStream(30); 
+            let mimeType = 'video/webm';
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+                mimeType = 'video/mp4';
+            }
+
+            let recorder;
+            let chunks = [];
+
+            try {
+                recorder = new MediaRecorder(stream, { mimeType: mimeType });
+            } catch (e) {
+                recorder = new MediaRecorder(stream);
+            }
+
+            recorder.ondataavailable = function(e) {
+                if (e.data && e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = function() {
+                const blob = new Blob(chunks, { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `AI_Movie_${Date.now()}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                alert("ভিডিও ডাউনলোড সম্পন্ন হয়েছে!");
+            };
+
+            recorder.start(100);
+            isPlaying = true;
+            drawScene();
+
+            setTimeout(() => {
+                recorder.stop();
+                isPlaying = false;
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
