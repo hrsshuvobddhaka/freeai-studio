@@ -18,7 +18,7 @@
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/20">🎬</div>
             <div>
                 <h1 class="font-bold text-base leading-tight">AI Director Studio</h1>
-                <span class="text-xs text-cyan-400 font-medium">v2.8 Free Edition</span>
+                <span class="text-xs text-cyan-400 font-medium">v2.9 Free Edition</span>
             </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -42,7 +42,7 @@
             <div class="aspect-video bg-black rounded-xl overflow-hidden relative border border-slate-800 flex items-center justify-center">
                 <canvas id="previewCanvas" width="640" height="360" class="w-full h-full object-cover"></canvas>
                 <div id="subtitleOverlay" class="absolute bottom-4 left-4 right-4 text-center bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-medium text-cyan-300 border border-cyan-500/30">
-                    "প্রজেক্ট লোড হচ্ছে... স্ক্রিপ্ট লিখুন বা প্লে বাটনে চাপুন।"
+                    "প্রজেক্ট লোড হয়েছে... স্ক্রিপ্ট লিখুন বা প্লে বাটনে চাপুন।"
                 </div>
             </div>
 
@@ -148,24 +148,19 @@
             }
         }
 
-        // Bangla Speech Synthesis with Fallback Synthesizer
+        // Google Translate TTS based Bangla Voice Generator
         function playVoiceAudio() {
             const text = document.getElementById('voiceText').value;
             document.getElementById('subtitleOverlay').innerText = `"${text}"`;
 
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'bn-BD';
-                utterance.rate = 0.9;
-                
-                utterance.onerror = () => {
-                    playFallbackBeep();
-                };
-                window.speechSynthesis.speak(utterance);
-            } else {
+            if (!text) return;
+
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=bn&client=tw-ob`;
+            const audio = new Audio(ttsUrl);
+            audio.play().catch(error => {
+                console.log("Audio play blocked, using fallback beep:", error);
                 playFallbackBeep();
-            }
+            });
         }
 
         function playFallbackBeep() {
@@ -228,34 +223,33 @@
             alert("প্রজেক্ট সফলভাবে লোকাল স্টোরেজে সংরক্ষিত হয়েছে!");
         }
 
+        // Real Canvas Video Recording & MP4 Download Function
         function exportVideo() {
-            alert("ভিডিও রেন্ডারিং সম্পন্ন হয়েছে! ব্রাউজার থেকে ডাউনলোড শুরু হচ্ছে...");
-            // Simulate clean Blob download
-            const blob = new Blob(["AI Director Studio Export Video Data"], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'AI_Movie_Project.mp4';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-    </script>
-</body>
-</html>
-// Google Translate TTS ভিত্তিক নিখুঁত বাংলা ভয়েস জেনারেটর
-function playVoiceAudio() {
-    const text = document.getElementById('voiceText').value;
-    document.getElementById('subtitleOverlay').innerText = `"${text}"`;
+            alert("ভিডিও রেন্ডারিং শুরু হচ্ছে... দয়া করে ৪ সেকেন্ড অপেক্ষা করুন।");
+            
+            const stream = canvas.captureStream(30); 
+            let recorder;
+            let chunks = [];
 
-    if (!text) return;
+            try {
+                recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+            } catch (e) {
+                try {
+                    recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                } catch (err) {
+                    recorder = new MediaRecorder(stream);
+                }
+            }
 
-    // Google TTS Free API URL (বাংলা ভাষার জন্য bn)
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=bn&client=tw-ob`;
-    
-    const audio = new Audio(ttsUrl);
-    audio.play().catch(error => {
-        console.log("Audio play blocked, using fallback beep:", error);
-        playFallbackBeep();
-    });
-}
+            recorder.ondataavailable = function(e) {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = function() {
+                const blob = new Blob(chunks, { type: 'video/mp4' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'AI_Director_Studio_Project.mp4';
+                document.body.appendChild(a);
+                a.click();
